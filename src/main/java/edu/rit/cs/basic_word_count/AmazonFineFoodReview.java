@@ -10,7 +10,7 @@ public class AmazonFineFoodReview {
     private int _HelpfulnessNumerator;
     private int _HelpfulnessDenominator;
     private int _Score;
-    private int _Time;
+    private long _Time;
     private String _Summary;
     private String _Text;
 
@@ -39,7 +39,7 @@ public class AmazonFineFoodReview {
             this._HelpfulnessNumerator = Integer.valueOf(data[4]);
             this._HelpfulnessDenominator = Integer.valueOf(data[5]);
             this._Score = Integer.valueOf(data[6]);
-            this._Time = Integer.valueOf(data[7]);
+            this._Time = Long.valueOf(data[7]);
             this._Summary = data[8];
             this._Text = data[9];
         }catch(Exception e){
@@ -96,11 +96,11 @@ public class AmazonFineFoodReview {
         this._Score = _Score;
     }
 
-    public int get_Time() {
+    public long get_Time() {
         return _Time;
     }
 
-    public void set_Time(int _Time) {
+    public void set_Time(long _Time) {
         this._Time = _Time;
     }
 

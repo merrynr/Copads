@@ -1,8 +1,10 @@
 package edu.rit.cs.basic_word_count;
 
+import edu.rit.cs.MyTimer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
+
 
 
 public class WordCount_Seq {
@@ -40,10 +42,12 @@ public class WordCount_Seq {
 //            System.out.println(review.get_Text());
 //        }
 
+        MyTimer myTimer = new MyTimer("wordCount");
 
+
+        myTimer.start_timer();
         /* Tokenize words */
-        long startTime = System.nanoTime();
-        List<String> words = new ArrayList<>();
+        List<String> words = new ArrayList<String>();
         for(AmazonFineFoodReview review : allReviews) {
             StringTokenizer st = new StringTokenizer(review.get_Summary());
             if(st.hasMoreTokens())
@@ -60,12 +64,11 @@ public class WordCount_Seq {
                 wordcount.replace(word, init_value, init_value+1);
             }
         }
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-
+        myTimer.stop_timer();
 
         print_word_count(wordcount);
-        System.out.println("Time: "+duration);
+
+        myTimer.print_elapsed_time();
     }
 
 }
