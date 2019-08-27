@@ -4,7 +4,8 @@ import edu.rit.cs.MyTimer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class WordCount_Seq {
@@ -47,12 +48,14 @@ public class WordCount_Seq {
         /* Tokenize words */
         List<String> words = new ArrayList<String>();
         for(AmazonFineFoodReview review : allReviews) {
-            StringTokenizer st = new StringTokenizer(review.get_Summary());
-            while(st.hasMoreTokens())
-                words.add(st.nextToken());
+            Pattern pattern = Pattern.compile("([a-zA-Z]+)");
+            Matcher matcher = pattern.matcher(review.get_Summary());
+
+            while(matcher.find())
+                words.add(matcher.group().toLowerCase());
         }
 
-        /* Count words */
+//        /* Count words */
         Map<String, Integer> wordcount = new HashMap<>();
         for(String word : words) {
             if(!wordcount.containsKey(word)) {
