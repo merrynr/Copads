@@ -43,14 +43,12 @@ public class WordCount_Seq {
 //        }
 
         MyTimer myTimer = new MyTimer("wordCount");
-
-
         myTimer.start_timer();
         /* Tokenize words */
         List<String> words = new ArrayList<String>();
         for(AmazonFineFoodReview review : allReviews) {
             StringTokenizer st = new StringTokenizer(review.get_Summary());
-            if(st.hasMoreTokens())
+            while(st.hasMoreTokens())
                 words.add(st.nextToken());
         }
 
