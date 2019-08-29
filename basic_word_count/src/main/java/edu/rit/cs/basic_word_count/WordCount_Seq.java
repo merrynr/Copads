@@ -1,6 +1,5 @@
 package edu.rit.cs.basic_word_count;
 
-import edu.rit.cs.MyTimer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.regex.Pattern;
 
 
 public class WordCount_Seq {
-    public static final String AMAZON_FINE_FOOD_REVIEWS_file="dataset/amazon-fine-food-reviews/Reviews.csv";
+    public static final String AMAZON_FINE_FOOD_REVIEWS_file="amazon-fine-food-reviews/Reviews.csv";
 
     public static List<AmazonFineFoodReview> read_reviews(String dataset_file) {
         List<AmazonFineFoodReview> allReviews = new ArrayList<>();

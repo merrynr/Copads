@@ -1,4 +1,4 @@
-package edu.rit.cs;
+package edu.rit.cs.basic_word_count;
 
 public class MyTimer {
     private String timerName;
