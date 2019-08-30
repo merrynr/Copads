@@ -1,2 +1,5 @@
 rootProject.name = 'CoPaDS'
+include 'basic_word_count'
+include 'chord'
+include 'pubsub'
 
