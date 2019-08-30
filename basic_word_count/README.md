@@ -7,6 +7,6 @@ amazon-fine-food-reviews/Reviews.csv
 
 ### Run this example in this folder
 ```
-gradle basic_word_count:build
-java -cp basic_word_count/build/libs/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq
+../gradlew build
+java -cp build/libs/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq
 ```
