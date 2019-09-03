@@ -5,8 +5,12 @@
 amazon-fine-food-reviews/Reviews.csv
 ``` 
 
-### Run this example in this folder
+### Build this example as a jar
 ```
 mvn package
+```
+
+### Run this example in this folder
+```
 java -cp target/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq
 ```
