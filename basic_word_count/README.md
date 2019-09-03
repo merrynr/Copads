@@ -5,8 +5,20 @@
 amazon-fine-food-reviews/Reviews.csv
 ``` 
 
-### Run this example in this folder
+### Build this example in this folder
 ```
 ../gradlew build
+```
+
+
+### Run this example in this folder
+```
 java -cp build/libs/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq
+```
+
+### Issues
+
+- “Exception in thread “main” java.lang.OutOfMemoryError: Java heap space” error. One naive solution is increase the memory. But, you need to think about how to optimize the program, so that you can avoid this naive fix.
+```
+export JVM_ARGS="-Xmx1024m -XX:MaxPermSize=256m"
 ```
