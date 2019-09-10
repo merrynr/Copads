@@ -10,9 +10,14 @@ amazon-fine-food-reviews/Reviews.csv
 mvn package
 ```
 
-### Run this example in this folder
+### Run WordCount_Seq
 ```
 java -cp target/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq
+```
+
+### Run WordCount_Seq_Improved
+```
+java -cp target/basic_word_count-1.0-SNAPSHOT.jar edu.rit.cs.basic_word_count.WordCount_Seq_Improved
 ```
 
 ### Issues
