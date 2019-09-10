@@ -35,7 +35,10 @@ public class WordCount_Seq_Improved {
         return allReviews;
     }
 
-
+    /**
+     * Print the list of words and their counts
+     * @param wordcount
+     */
     public static void print_word_count( Map<String, Integer> wordcount){
         for(String word : wordcount.keySet()){
             System.out.println(word + " : " + wordcount.get(word));
@@ -43,7 +46,7 @@ public class WordCount_Seq_Improved {
     }
 
     /**
-     * map a function of emit 1 for every word and store this as a <key, value> pair
+     * Emit 1 for every word and store this as a <key, value> pair
      * @param allReviews
      * @return
      */
@@ -61,6 +64,11 @@ public class WordCount_Seq_Improved {
     }
 
 
+    /**
+     * count the frequency of each unique word
+     * @param kv_pairs
+     * @return a list of words with their count
+     */
     public static Map<String, Integer> reduce(List<KV<String, Integer>> kv_pairs) {
         Map<String, Integer> results = new HashMap<>();
 
