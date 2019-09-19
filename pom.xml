@@ -16,6 +16,9 @@
         <module>basic_word_count</module>
         <module>chord</module>
         <module>pubsub</module>
+        <module>socket_programming</module>
+        <module>remote_procedure_call</module>
+
     </modules>
 
     <properties>
