@@ -1,4 +1,4 @@
-package edu.rit.cs.pubsub;
+package edu.rit.cs;
 
 public interface Subscriber {
 	/*

@@ -1,4 +1,4 @@
-package edu.rit.cs.chord;
+package edu.rit.cs;
 
 public class Peer {
     private int Id;

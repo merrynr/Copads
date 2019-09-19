@@ -1,4 +1,4 @@
-package edu.rit.cs.pubsub;
+package edu.rit.cs;
 
 import java.util.List;
 
