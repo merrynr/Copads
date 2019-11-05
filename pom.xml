@@ -14,7 +14,7 @@
     <!-- sub modules -->
     <modules>
         <module>basic_word_count</module>
-        <module>chord</module>
+        <module>distributed_hash_table</module>
         <module>pubsub</module>
         <module>socket_programming</module>
         <module>remote_procedure_call</module>
