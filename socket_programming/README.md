@@ -37,10 +37,10 @@ Received: HelloWord
 
 Start the server
 ```
-java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.UDPServer
+java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.socket.UDPServer
 ```
 
 Run the client (change the localhost to hostname or IP address of the machine where you run the server)
 ```
-java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.UDPClient HelloWord localhost
+java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.socket.UDPClient HelloWord localhost
 ```

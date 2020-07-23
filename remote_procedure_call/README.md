@@ -7,12 +7,12 @@ mvn package
 
 Start RPC server
 ```
-java -cp target/remote_procedure_call-1.0-SNAPSHOT.jar edu.rit.cs.MiniServer
+java -cp target/remote_procedure_call-1.0-SNAPSHOT.jar edu.rit.cs.rpc.MiniServer
 ```
 
 Start RPC client
 ```
-java -cp target/remote_procedure_call-1.0-SNAPSHOT.jar edu.rit.cs.JsonRPCClient
+java -cp target/remote_procedure_call-1.0-SNAPSHOT.jar edu.rit.cs.rpc.JsonRPCClient
 ```
 
 Server Output

@@ -18,6 +18,9 @@
         <module>pubsub</module>
         <module>socket_programming</module>
         <module>remote_procedure_call</module>
+        <module>remote_method_invocation</module>
+        <module>distributed_consensus</module>
+        <module>gossip_protocol</module>
 
     </modules>
 

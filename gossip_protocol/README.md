@@ -1,0 +1,1 @@
+This project aims to implement the Gossiping protocols described in [this paper](https://www.distributed-systems.net/my-data/papers/2007.osr.pdf). 
