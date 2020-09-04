@@ -11,12 +11,12 @@ Connection based method
 
 Start the server
 ```
-java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.TCPServer
+java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.socket.TCPServer
 ```
 
 Run the client (change the localhost to hostname or IP address of the machine where you run the server)
 ```
-java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.TCPClient HelloWord localhost
+java -cp target/socket_programming-1.0-SNAPSHOT.jar edu.rit.cs.socket.TCPClient HelloWord localhost
 ```
 
 

@@ -17,6 +17,8 @@ services:
       - 9091
       - 9092
       - 9093
+      - 7896
+      - 6789
     command:
       - /bin/bash
       - -c
@@ -37,6 +39,8 @@ services:
       - 9091
       - 9092
       - 9093
+      - 7896
+      - 6789
     command:
       - /bin/bash
       - -c
