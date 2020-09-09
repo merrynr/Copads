@@ -1,0 +1,66 @@
+# Test this without rebuilding the docker image $> docker-compose  -f docker-compose-project1.yml up
+# Test this with rebuilding the docker image $> docker-compose --build -f docker-compose-project1.yml up
+
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile-project1
+    image: project1:latest
+    container_name: server
+    working_dir: /csci251
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+      - 7896
+      - 6789
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized server"
+        tail -f /dev/null
+
+
+  client1:
+    image: project1:latest
+    container_name: client1
+    depends_on:
+      - server
+    working_dir: /csci251
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized client1"
+        tail -f /dev/null
+
+  client2:
+    image: project1:latest
+    container_name: client2
+    depends_on:
+      - server
+    working_dir: /csci251
+    networks:
+      - csci251network
+    ports:
+      - 7896
+      - 6789
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized client2"
+        tail -f /dev/null
+
+networks:
+  csci251network:
