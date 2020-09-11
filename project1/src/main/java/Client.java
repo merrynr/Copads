@@ -25,11 +25,27 @@ public class Client {
             Socket replySocket = listenerSocket.accept();
             DataInputStream in = new DataInputStream(replySocket.getInputStream());
 
-            String data = in.readUTF();
-            System.out.println("Received data from server, \"" + data + "\".");
+            //receive results-file from server
+            String resultsFile = "src/main/resources/results";
+            Transfer.receiveAsFile(replySocket, resultsFile);
 
-            listenerSocket.close();
+            //close socket connections
             in.close();
+            replySocket.close();
+            listenerSocket.close();
+
+            //output results from file
+            System.out.println("Results from server:");
+            try (BufferedReader br = new BufferedReader(new FileReader(resultsFile))){
+                String resultsLine;
+
+                //read the subsequent lines
+                while ((resultsLine = br.readLine()) != null) {
+                    System.out.println(resultsLine);
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
 
         } catch (IOException e) {
             System.out.println("Listen :" + e.getMessage());
@@ -39,16 +55,16 @@ public class Client {
 }
 
 class Request extends Thread {
-    Socket requestSocket;
+    private Socket requestSocket;
 
-    String serverIP;
-    int serverPort;
+    private String serverIP;
+    private int serverPort;
 
-    int localPort;
+    private int localPort;
 
-    DataOutputStream out;
+    private DataOutputStream out;
 
-    String filename;
+    private String filename;
 
     public Request(String filename, String serverIP, int serverPort, int localPort){
         this.serverIP = serverIP;
@@ -67,13 +83,13 @@ class Request extends Thread {
 
             String addr = Integer.toString(localPort);
             out.writeUTF(addr);
-            System.out.println("Sent: " + addr + "\n");
+            System.out.println("Sent port# as " + addr + "\n");
 
             //read csv file and send contents to server
             Transfer.sendAsFile(requestSocket, filename);
             out.close();
 
-            System.out.println("Sent: " + addr + "\n");
+            System.out.println("Sent data-file for processing");
 
         } catch (UnknownHostException e) {
             System.out.println("Socket:" + e.getMessage());

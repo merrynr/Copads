@@ -20,4 +20,4 @@ Run the client (change the localhost to hostname or IP address of the machine wh
 java -cp target/project1-1.0-SNAPSHOT.jar Client <filename> <server IP address>
 ```
 For ex, on my computer this would be:
-java -cp target/project1-1.0-SNAPSHOT.jar Client affr.csv 172.18.0.2
+java -cp target/project1-1.0-SNAPSHOT.jar Client mini_affr.csv 172.18.0.2

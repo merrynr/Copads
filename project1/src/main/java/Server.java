@@ -26,14 +26,14 @@ public class Server {
 
 class Service extends Thread {
 
-    Socket requestSocket;
-    Socket returnSocket;
+    private Socket requestSocket;
+    private Socket returnSocket;
 
-    String clientIP;
-    int clientPort;
+    private String clientIP;
+    private int clientPort;
 
-    DataInputStream in;
-    DataOutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
 
     public Service(Socket aClientSocket) {
         requestSocket = aClientSocket;
@@ -72,10 +72,19 @@ class Service extends Thread {
             returnSocket = new Socket(clientIP, clientPort);
             out = new DataOutputStream(returnSocket.getOutputStream());
 
-            String message = "This is a test response from the server, did you get it?"; /*~*/
-            out.writeUTF(message); /*~*/
+            //send back results
+            Transfer.sendAsFile(returnSocket, outputFile);
+            System.out.println("Sent result-file back to: " + clientIP);
 
-            System.out.println("Sent: " + "\"" + message + "\"."); /*~*/
+            //close request_connection when done.
+            out.close();
+            returnSocket.close();
+
+            //delete files related to this particular client
+            File infile = new File(inputFile);
+            File outfile = new File(outputFile);
+            infile.delete();
+            outfile.delete();
 
 
         } catch (EOFException e) {
