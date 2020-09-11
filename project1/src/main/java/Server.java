@@ -1,3 +1,5 @@
+import wordcount.WordCount_Seq_Improved;
+
 import java.net.*;
 import java.io.*;
 
@@ -45,22 +47,26 @@ class Service extends Thread {
             in = new DataInputStream(requestSocket.getInputStream());
 
             String data = in.readUTF();
-            System.out.println("Received data from client: \"" + data + "\""); /*~*/
+            System.out.println("Received port# from client: \"" + data + "\""); /*~*/
 
-            clientIP = clientIP = requestSocket.getInetAddress().getHostAddress();
+            clientIP = requestSocket.getInetAddress().getHostAddress();
             clientPort = Integer.parseInt(data);
-            String inputFile = "src/main/resources/" + clientIP + "_Input";
 
             //read inputStream + write to file
+            String inputFile = "src/main/resources/" + clientIP + "_Input";
             Transfer.receiveAsFile(requestSocket, inputFile);
-            System.out.println("Finished writing data to: " + inputFile);
+            System.out.println("Data recieved in " + inputFile);
 
             //close request_connection when done.
             in.close();
             requestSocket.close();
 
-
-            //TODO: handle word count + format response
+            //handle word count + format response
+            //IMPORTANT NOTE: affr.csv is too large to handle & causes outOfMemoryError on heap space
+            //however smaller data-sets such as mini_affr.csv seem to work fine on my machine
+            String outputFile = "src/main/resources/" + clientIP + "_Output";
+            WordCount_Seq_Improved.countWords(inputFile, outputFile);
+            System.out.println("Finished writing results to: " + outputFile);
 
             //establish return_connection
             returnSocket = new Socket(clientIP, clientPort);

@@ -1,7 +1,9 @@
 package wordcount;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,14 +13,12 @@ import java.util.regex.Pattern;
 
 public class WordCount_Seq_Improved {
 
-    public static final String AMAZON_FINE_FOOD_REVIEWS_file="amazon-fine-food-reviews/Reviews.csv";
-
     /**
      * Read and parse all reviews
      * @param dataset_file
      * @return list of reviews
      */
-    public static List<AmazonFineFoodReview> read_reviews(String dataset_file) {
+    private static List<AmazonFineFoodReview> read_reviews(String dataset_file) {
         List<AmazonFineFoodReview> allReviews = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(dataset_file))){
             String reviewLine = null;
@@ -36,10 +36,28 @@ public class WordCount_Seq_Improved {
     }
 
     /**
+     * Write the list of words and their counts to given file
+     * @param wordcount
+     */
+    private static void write_word_count( Map<String, Integer> wordcount, String results_file){
+        String resultLine;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(results_file))){
+            for(String word : wordcount.keySet()) {
+                resultLine = word + " : " + wordcount.get(word);
+                bw.write(resultLine);
+                bw.newLine();
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Print the list of words and their counts
      * @param wordcount
      */
-    public static void print_word_count( Map<String, Integer> wordcount){
+    private static void print_word_count( Map<String, Integer> wordcount){
         for(String word : wordcount.keySet()){
             System.out.println(word + " : " + wordcount.get(word));
         }
@@ -50,7 +68,7 @@ public class WordCount_Seq_Improved {
      * @param allReviews
      * @return
      */
-    public static List<KV<String, Integer>> map(List<AmazonFineFoodReview> allReviews) {
+    private static List<KV<String, Integer>> map(List<AmazonFineFoodReview> allReviews) {
         List<KV<String, Integer>> kv_pairs = new ArrayList<KV<String, Integer>>();
 
         for(AmazonFineFoodReview review : allReviews) {
@@ -69,7 +87,7 @@ public class WordCount_Seq_Improved {
      * @param kv_pairs
      * @return a list of words with their count
      */
-    public static Map<String, Integer> reduce(List<KV<String, Integer>> kv_pairs) {
+    private static Map<String, Integer> reduce(List<KV<String, Integer>> kv_pairs) {
         Map<String, Integer> results = new HashMap<>();
 
         for(KV<String, Integer> kv : kv_pairs) {
@@ -84,8 +102,8 @@ public class WordCount_Seq_Improved {
     }
 
 
-    public static void main(String[] args) {
-        List<AmazonFineFoodReview> allReviews = read_reviews(AMAZON_FINE_FOOD_REVIEWS_file);
+    public static void countWords(String inputFile, String outputFile) {
+        List<AmazonFineFoodReview> allReviews = read_reviews(inputFile);
 
         System.out.println("Finished reading all reviews, now performing word count...");
 
@@ -101,7 +119,7 @@ public class WordCount_Seq_Improved {
         myReduceTimer.stop_timer();
         myReduceTimer.print_elapsed_time();
 
-        print_word_count(results);
+        write_word_count(results, outputFile);
 
         myMapTimer.print_elapsed_time();
         myReduceTimer.print_elapsed_time();
