@@ -5,7 +5,7 @@ public class Client {
 
     public static void main(String args[]) {
 
-        String filename = args[0];
+        String filename = "src/main/resources/" + args[0];
 
         String serverIP = args[1];
         int serverPort = 6789;
@@ -54,7 +54,6 @@ class Request extends Thread {
         this.serverIP = serverIP;
         this.serverPort = 6789;
 
-        //this.localIP = localIP;
         this.localPort = localPort;
         this.filename = filename;
         this.start();
@@ -68,6 +67,12 @@ class Request extends Thread {
 
             String addr = Integer.toString(localPort);
             out.writeUTF(addr);
+            System.out.println("Sent: " + addr + "\n");
+
+            //read csv file and send contents to server
+            Transfer.sendAsFile(requestSocket, filename);
+            out.close();
+
             System.out.println("Sent: " + addr + "\n");
 
         } catch (UnknownHostException e) {

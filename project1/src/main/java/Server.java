@@ -41,7 +41,7 @@ class Service extends Thread {
     public void run() {
         try {
             //establish request_connection streams
-            //then read input & close request_connection as soon as finished reading.
+
             in = new DataInputStream(requestSocket.getInputStream());
 
             String data = in.readUTF();
@@ -49,12 +49,18 @@ class Service extends Thread {
 
             clientIP = clientIP = requestSocket.getInetAddress().getHostAddress();
             clientPort = Integer.parseInt(data);
-            System.out.println(clientIP); /*~*/
-            System.out.println(clientPort); /*~*/
+            String inputFile = "src/main/resources/" + clientIP + "_Input";
+
+            //read inputStream + write to file
+            Transfer.receiveAsFile(requestSocket, inputFile);
+            System.out.println("Finished writing data to: " + inputFile);
+
+            //close request_connection when done.
+            in.close();
+            requestSocket.close();
+
 
             //TODO: handle word count + format response
-            requestSocket.close();
-            in.close();
 
             //establish return_connection
             returnSocket = new Socket(clientIP, clientPort);

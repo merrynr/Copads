@@ -1,5 +1,5 @@
 # Test this without rebuilding the docker image $> docker-compose  -f docker-compose-project1.yml up
-# Test this with rebuilding the docker image $> docker-compose --build -f docker-compose-project1.yml up
+# Test this with rebuilding the docker image $> docker-compose -f docker-compose-project1.yml up --build
 
 version: '3.7'
 
