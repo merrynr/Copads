@@ -8,16 +8,36 @@ mvn package
 ```
 
 ## **Executables**
-... are a service based method
+If not already in project1 directory, cd project1
 
 Start the server
+
 ```
 java -cp target/project1-1.0-SNAPSHOT.jar Server
 ```
 
-Run the client (change the localhost to hostname or IP address of the machine where you run the server)
+Run the client
+
 ```
 java -cp target/project1-1.0-SNAPSHOT.jar Client <filename> <server IP address>
 ```
-For ex, on my computer this would be:
-java -cp target/project1-1.0-SNAPSHOT.jar Client mini_affr.csv 172.18.0.2
+
+(change the localhost to hostname or IP address of the machine where you run the server)
+
+## **Notes**
+Please ensure your inputted csv file is in the resources directory:
+
+```
+project1/src/main/resources/
+```
+In addition, a copy of the results on client-side can also be found in:
+
+```
+src/main/resources/results
+```
+
+Project1's design architecture is located next to this README.md as:
+
+```
+Architecture.png
+```

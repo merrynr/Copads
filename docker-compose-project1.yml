@@ -24,6 +24,8 @@ services:
       - |
         echo "Initialized server"
         tail -f /dev/null
+    environment:
+      - JVM_OPTS=-Xmx1024m -XX:MaxPermSize=256m
 
 
   client1:

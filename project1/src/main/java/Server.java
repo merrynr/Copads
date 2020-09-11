@@ -5,6 +5,10 @@ import java.io.*;
 
 public class Server {
 
+    /**
+     * Server main process function listens for initial connection from any incoming clients
+     * and creates a serivce thread to handle each one
+     */
     public static void main(String args[]) {
         int listenerPort = 6789;
 
@@ -40,6 +44,13 @@ class Service extends Thread {
         this.start();
     }
 
+    /**
+     * Thread function to give service to a single client.
+     * Eg:
+     * establish initial connection with client, read received
+     * data-set file, preform word_count on it, format results,
+     * and finally send it back to the client as a file
+     */
     public void run() {
         try {
             //establish request_connection streams
@@ -63,7 +74,6 @@ class Service extends Thread {
 
             //handle word count + format response
             //IMPORTANT NOTE: affr.csv is too large to handle & causes outOfMemoryError on heap space
-            //however smaller data-sets such as mini_affr.csv seem to work fine on my machine
             String outputFile = "src/main/resources/" + clientIP + "_Output";
             WordCount_Seq_Improved.countWords(inputFile, outputFile);
             System.out.println("Finished writing results to: " + outputFile);

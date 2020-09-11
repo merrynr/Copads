@@ -101,7 +101,11 @@ public class WordCount_Seq_Improved {
         return results;
     }
 
-
+    /**
+     * encapsulate word-counting process into a single public function to be accessed by service
+     * @params inputFile, outputFile
+     * @return a list of words with their count
+     */
     public static void countWords(String inputFile, String outputFile) {
         List<AmazonFineFoodReview> allReviews = read_reviews(inputFile);
 

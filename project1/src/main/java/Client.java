@@ -3,6 +3,10 @@ import java.io.*;
 
 public class Client {
 
+    /**
+     * Client main process function listens for returning connection from server and outputs data
+     * @params args[] (Commandline args -> String filename, String serverAddress)
+     */
     public static void main(String args[]) {
 
         String filename = "src/main/resources/" + args[0];
@@ -75,6 +79,10 @@ class Request extends Thread {
         this.start();
     }
 
+    /**
+     * Thread function to set up initial connection to server,
+     * read data-set file, and send to server
+     */
     public void run() {
         //establish request_connection
         try {

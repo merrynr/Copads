@@ -25,7 +25,7 @@ COPY LICENSE /csci251/
 # e.g., COPY project1 /csci251/project1
 
 # setup working directory in the container
-WORKDIR /csci251
+WORKDIR /csci251/project1
 
 # go into the working directory and build java package using maven
 RUN cd /csci251/project1/ && mvn package
