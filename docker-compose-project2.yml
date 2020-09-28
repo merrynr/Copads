@@ -1,0 +1,69 @@
+# Test this without rebuilding the docker image $> docker-compose up
+# Test this with rebuilding the docker image $> docker-compose up --build
+
+version: '3.7'
+
+services:
+  peer1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: csci251:latest
+    container_name: peer1
+    working_dir: /csci251/project2
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+      - 9093
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer1"
+        tail -f /dev/null
+
+
+  peer2:
+    image: csci251:latest
+    container_name: peer2
+    depends_on:
+      - peer1
+    working_dir: /csci251/project2
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+      - 9093
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer2"
+        tail -f /dev/null
+
+  peer3:
+    image: csci251:latest
+    container_name: peer3
+    depends_on:
+      - peer2
+    working_dir: /csci251/project2
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+      - 9093
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer3"
+        tail -f /dev/null
+
+
+
+networks:
+  csci251network:
