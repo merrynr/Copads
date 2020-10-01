@@ -22,6 +22,7 @@
         <module>distributed_consensus</module>
         <module>gossip_protocol</module>
         <module>project1</module>
+        <module>project2</module>
 
     </modules>
 

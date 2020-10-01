@@ -1,5 +1,5 @@
-# Test this without rebuilding the docker image $> docker-compose up
-# Test this with rebuilding the docker image $> docker-compose up --build
+# Test this without rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up
+# Test this with rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up --build
 
 version: '3.7'
 
@@ -7,16 +7,19 @@ services:
   peer1:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: csci251:latest
+      dockerfile: Dockerfile-project2
+    image: project2:latest
     container_name: peer1
     working_dir: /csci251/project2
+    volumes:
+      - ./project2:/project2
+    environment:
+      - HOSTNAME=peer1
     networks:
       - csci251network
     ports:
       - 9091
       - 9092
-      - 9093
     command:
       - /bin/bash
       - -c
@@ -26,17 +29,20 @@ services:
 
 
   peer2:
-    image: csci251:latest
+    image: project2:latest
     container_name: peer2
     depends_on:
       - peer1
     working_dir: /csci251/project2
+    volumes:
+      - ./project2:/project2
+    environment:
+      - HOSTNAME=peer2
     networks:
       - csci251network
     ports:
       - 9091
       - 9092
-      - 9093
     command:
       - /bin/bash
       - -c
@@ -45,17 +51,20 @@ services:
         tail -f /dev/null
 
   peer3:
-    image: csci251:latest
+    image: project2:latest
     container_name: peer3
     depends_on:
       - peer2
     working_dir: /csci251/project2
+    volumes:
+      - ./project2:/project2
+    environment:
+      - HOSTNAME=peer3
     networks:
       - csci251network
     ports:
       - 9091
       - 9092
-      - 9093
     command:
       - /bin/bash
       - -c
