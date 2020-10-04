@@ -10,11 +10,19 @@ public class Host extends Thread{
     private final double sendSize = 0.5; //percentage of peerList to send to
     private final int sendCount = 2;
 
+    private int number;
+    private int maxNumber;
+    private int round;
+
     /** Host Constructor */
     public Host() {
         hostName = System.getenv("HOSTNAME");
         peerList = new HashMap<>();
         messageQueue = new LinkedList<>();
+
+        number = 0;
+        maxNumber = 0;
+        round = 1;
 
         System.out.println("I am " + hostName); //~*TestPrint*~//
     }
@@ -45,16 +53,16 @@ public class Host extends Thread{
         int forwardCountdown = Integer.parseInt(msgArgs[2]);
 
         //execute command & modify message if not from the host itself
-        printPeerList();
+        //printPeerList(); //~*TestPrint*~//
         if(!sender.equals(hostName)) {
             switch(cmd) {
                 case "Live":
-                    System.out.println("got live msg from someone else"); //~*TestPrint*~//
+                    //System.out.println("got live msg from someone else"); //~*TestPrint*~//
                     if(peerList.containsKey(sender)) {
                         peerList.get(sender).resetTimer();
                     } else {
 
-                        System.out.println("peerList added " + sender); //~*TestPrint*~//
+                        //System.out.println("peerList added " + sender); //~*TestPrint*~//
                         addPeer(sender);
                     }
                     break;
@@ -63,11 +71,33 @@ public class Host extends Thread{
                         peerList.remove(sender);
                     }
                     break;
+                case "Number":
+                    if(peerList.containsKey(sender)) {
+                        Peer peer = peerList.get(sender);
+                        int recNumber = Integer.parseInt(msgArgs[3]);
+                        //if(peer.get_number() == 0) {
+                            peer.set_number(recNumber);
+                            //update maxNum
+                            if(recNumber > maxNumber) {
+                                maxNumber = recNumber;
+                            }
+
+                            if(endRound()) {
+                                synchronized(peerList) {
+                                    peerList.notify();
+                                }
+                            }
+
+                        //}
+
+                    }
+
+                    break;
             }
         }
 
         if(forwardCountdown > 0 ) {
-            System.out.println(message);
+            System.out.println(message); //~*TestPrint*~//
             msgArgs[2] = Integer.toString(forwardCountdown - 1);
             message = String.join(" ", msgArgs);
 
@@ -83,6 +113,14 @@ public class Host extends Thread{
     //Accessors
     public String getHostName() {
         return hostName;
+    }
+
+    public Map<String, Peer> getPeerList() {
+        return peerList;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     public int getSendCount() {
@@ -116,7 +154,7 @@ public class Host extends Thread{
             if(absSendSize == 0)
                 absSendSize++;
 
-            System.out.println("\tforward targets:"); //~*TestPrint*~//
+            //System.out.println("\tforward targets:"); //~*TestPrint*~//
 
             Collections.shuffle(allPeers);
             for (int i = 0; i < absSendSize; i++) {
@@ -130,8 +168,9 @@ public class Host extends Thread{
 
     public void printPeerList() {
         System.out.println("PeerList: ");
-        for (String key : peerList.keySet())
+        for (String key : peerList.keySet()) {
             System.out.println("\t" + key);
+        }
     }
 
 
@@ -144,6 +183,36 @@ public class Host extends Thread{
 
     }
 
+    //Methods for Number
+    public void genNumber() {
+        Random r = new Random();
+        number = r.nextInt(100) + 1;
+        maxNumber = number;
+    }
+
+    public boolean endRound() {
+        boolean nonZero = true;
+        for (Peer peer : peerList.values()) {
+            if(peer.get_number() == 0) {
+                nonZero = false;
+                break;
+            }
+        }
+        return nonZero;
+    }
+
+    public void showMaxNumber() {
+        System.out.println("Round " + round + ": " + maxNumber);
+        //System.out.println(maxNumber);
+        for (String peerName : peerList.keySet()){
+            if(peerList.get(peerName).get_number() != 0) {
+                System.out.println("\t" + peerName + ", RandomNumber: " +
+                        peerList.get(peerName).get_number());
+            }
+        }
+
+        round++;
+    }
 }
 
 

@@ -13,7 +13,7 @@ public class Heartbeat extends Thread{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            String liveMsg = "Live " + host.getHostName() + " " + (host.getSendCount());
+            String liveMsg = "Live " + host.getHostName() + " " + host.getSendCount();
             host.addMessage(liveMsg);
         }
     }

@@ -39,8 +39,7 @@ public class Peer {
             }
 
             if(!isInterupted) {
-                //alive = false;
-                String downMsg = "Down " + name + " " + (host.getSendCount());
+                String downMsg = "Down " + name + " " + host.getSendCount();
                 host.addMessage(downMsg);
                 host.removePeer(name); //delete this
             }

@@ -15,11 +15,15 @@ public class Main {
         Heartbeat heartbeat = new Heartbeat(host);
         heartbeat.start();
 
+        MaxNumber maxNumber = new MaxNumber(host);
+        maxNumber.start();
+
         try{
             broadcastServer.join();
             unicastServer.join();
 
             heartbeat.join();
+            maxNumber.join();
             host.join();
 
         } catch (InterruptedException e) {
