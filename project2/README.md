@@ -13,7 +13,7 @@ If not already in project1 directory, cd project1
 Start a peer
 
 ```
-java -cp target/project2-1.0-SNAPSHOT.jar Host
+java -cp target/project2-1.0-SNAPSHOT.jar Main
 ```
 
 ## **Notes**

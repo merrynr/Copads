@@ -1,0 +1,29 @@
+public class Main {
+
+    public static void main(String args[]) {
+
+        //central server/manager
+        Host host = new Host();
+        host.start();
+
+        Broadcast broadcastServer = new Broadcast(host);
+        broadcastServer.start();
+
+        Unicast unicastServer = new Unicast(host);
+        unicastServer.start();
+
+        Heartbeat heartbeat = new Heartbeat(host);
+        heartbeat.start();
+
+        try{
+            broadcastServer.join();
+            unicastServer.join();
+
+            heartbeat.join();
+            host.join();
+
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted :" + e.getMessage());
+        }
+    }
+}

@@ -1,29 +1,49 @@
-import java.time.LocalDateTime;
-
 public class Peer {
 
-    private boolean alive;
+    private Host host;
+
+    private String name;
     private int number;
-    private Thread timer; //FIXME
-    //inetAddress - IPaddress???
+    private Timer timer;
 
 
-    public Peer() {
-        this.alive = true;
-        this.number = 0;
-
-        //TODO: add countdown timer
+    public Peer(Host current, String peerName) {
+        host = current;
+        name = peerName;
+        number = 0;
+        timer = new Timer();
+        timer.start();
     }
 
 
-    //Mutators
-    public void set_alive(boolean alive) { this.alive = alive; }
-
     public void set_number(int number) { this.number = number; }
-
-    //Accessors
-    public boolean get_alive() { return  alive; }
 
     public int get_number() { return number; }
 
+
+    public void resetTimer() {
+        timer.interrupt();
+        timer = new Timer();
+        timer.start();
+    }
+
+    /** Timer thread subclass */
+    private class Timer extends Thread {
+
+        public void run() {
+            boolean isInterupted = false;
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                isInterupted = true;
+            }
+
+            if(!isInterupted) {
+                //alive = false;
+                String downMsg = "Down " + name + " " + (host.getSendCount());
+                host.addMessage(downMsg);
+                host.removePeer(name); //delete this
+            }
+        }
+    }
 }

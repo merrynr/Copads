@@ -1,4 +1,5 @@
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.*;
@@ -8,7 +9,7 @@ import java.net.*;
 class Broadcast extends Thread {
 
     private Host host;
-    private int port;
+    private static int port;
 
     private DatagramSocket listenerSocket;
     int bufLen;
@@ -22,7 +23,7 @@ class Broadcast extends Thread {
         host = current;
         port = 9091;
 
-        initMsg = "Add " + host.hostname;
+        initMsg = "Add " + host.getHostName();
         bufLen = 256;
         listenerBuf = new byte[bufLen];
     }
@@ -42,22 +43,10 @@ class Broadcast extends Thread {
                 recMsg = new String(packet.getData()).trim();
 
                 String msgArgs[] = recMsg.split(" ");
-                if (!msgArgs[1].equals(host.hostname)) {
+                if (!msgArgs[1].equals(host.getHostName())) {
 
-                    //New Peer FIXME: refactor code
-                    if (!host.peerList.containsKey(msgArgs[1])) {
-
-                        System.out.println(recMsg);
-                        Peer newPeer = new Peer();
-                        host.peerList.put(msgArgs[1],newPeer);
-                        //System.out.println("alive=" + newPeer.get_alive()); //Change this to timestamp later
-                    } else {
-                        //Peer shutdown and restarted
-                        Peer aPeer = host.peerList.get(msgArgs[1]);
-                        aPeer.set_alive(true);
-                        aPeer.set_number(1);
-                        //System.out.println("test_number=" + aPeer.get_number());
-                    }
+                    //New Peer
+                    host.addPeer(msgArgs[1]);
                 }
 
             }
@@ -68,17 +57,17 @@ class Broadcast extends Thread {
     }
 
     /** Broadcast sender */
-    private void broadcast(String message) throws IOException {
-        DatagramSocket senderSocket = new DatagramSocket();
-        senderSocket.setBroadcast(true);
+    private static void broadcast (String message) throws IOException {
+        DatagramSocket senderSocket = senderSocket = new DatagramSocket();
+            senderSocket.setBroadcast(true);
 
-        byte[] senderBuf = message.getBytes();
+            byte[] senderBuf = message.getBytes();
 
-        DatagramPacket packet = new DatagramPacket(senderBuf, senderBuf.length,
-                InetAddress.getByName("255.255.255.255"), port);
-        senderSocket.send(packet);
-        System.out.println("packet sent");
-        senderSocket.close();
+            DatagramPacket packet = new DatagramPacket(senderBuf, senderBuf.length,
+                    InetAddress.getByName("255.255.255.255"), port);
+            senderSocket.send(packet);
+
+            if (senderSocket != null) senderSocket.close();
     }
 }
 
@@ -86,7 +75,7 @@ class Broadcast extends Thread {
 class Unicast extends Thread {
 
     private Host host;
-    private int port;
+    private static int port;
 
     ServerSocket listenerSocket;
 
@@ -100,25 +89,47 @@ class Unicast extends Thread {
     public void run() {
         try {
             listenerSocket = new ServerSocket(port);
-            System.out.println("Unicast Server is running and accepting client connections..."); //FIXME//
+            System.out.println("Unicast Server started ..."); //~*TestPrint*~//
             while (true) {
                 Socket peerSocket = listenerSocket.accept();
-                UnicastConnection c = new UnicastConnection(peerSocket);
+                UnicastConnection c = new UnicastConnection(host, peerSocket);
                 c.start();
             }
         } catch (IOException e) {
             System.out.println("Listen :" + e.getMessage());
         }
     }
+
+    public static void unicast (String message, String name) throws IOException{
+        Socket senderSocket = new Socket(name, port);
+        DataOutputStream out = new DataOutputStream(senderSocket.getOutputStream());
+
+        out.writeUTF(message);
+        out.flush();
+
+        out.close();
+
+        if (senderSocket != null) {
+            try {
+                senderSocket.close();
+            } catch (IOException e) {
+                System.out.println("close:" + e.getMessage());
+            }
+        }
+
+    }
 }
 
 
 class UnicastConnection extends Thread {
 
+    Host host;
+
     private DataInputStream in;
     private Socket peerSocket;
 
-    public UnicastConnection(Socket aPeerSocket) {
+    public UnicastConnection(Host current, Socket aPeerSocket) {
+        host = current;
         try {
             peerSocket = aPeerSocket;
             in = new DataInputStream(peerSocket.getInputStream());
@@ -130,11 +141,8 @@ class UnicastConnection extends Thread {
     /** Unicast listener */
     public void run() {
         try {
-            String data = in.readUTF();
-            System.out.println("Received message: " + data); //FIXME//
-
-            //TODO: store in queue for processing/forwarding
-
+            String message = in.readUTF();
+            host.addMessage(message);
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());
         } catch (IOException e) {
