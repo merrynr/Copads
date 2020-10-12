@@ -1,6 +1,10 @@
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Central class thread that directs almost all other threads
+ * - acts as a message control center for gossiping
+ */
 public class Host extends Thread{
 
     private String hostName;
@@ -24,7 +28,7 @@ public class Host extends Thread{
         maxNumber = 0;
         round = 1;
 
-        System.out.println("I am " + hostName); //~*TestPrint*~//
+        System.out.println("I am " + hostName);
     }
 
     /** Gossip manager */
@@ -97,13 +101,13 @@ public class Host extends Thread{
         }
 
         if(forwardCountdown > 0 ) {
-            System.out.println(message); //~*TestPrint*~//
+            System.out.println(message);
             msgArgs[2] = Integer.toString(forwardCountdown - 1);
             message = String.join(" ", msgArgs);
 
             for (String peer : selectPeers()) {
                 try {
-                    System.out.println(); //~*TestPrint*~//
+                    System.out.println();
                     Unicast.unicast(message, peer);
                 } catch (IOException e) {/*peer is down, timer will eventually remove it*/}
             }
@@ -153,8 +157,6 @@ public class Host extends Thread{
 
             if(absSendSize == 0)
                 absSendSize++;
-
-            //System.out.println("\tforward targets:"); //~*TestPrint*~//
 
             Collections.shuffle(allPeers);
             for (int i = 0; i < absSendSize; i++) {

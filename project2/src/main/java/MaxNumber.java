@@ -1,3 +1,9 @@
+/**
+ * Number manager. Wakes every 2 seconds to:
+ * - gen number for host
+ * - create host's outward number message
+ * - summarize round
+ */
 public class MaxNumber extends Thread{
     Host host;
 

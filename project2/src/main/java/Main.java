@@ -1,3 +1,6 @@
+/**
+ * Application class - starts broadcast, unicast, host, heartbeat, and maxnumber threads
+ */
 public class Main {
 
     public static void main(String args[]) {

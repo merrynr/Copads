@@ -1,3 +1,6 @@
+/**
+ * Heartbeat generator
+ */
 public class Heartbeat extends Thread{
 
     Host host;

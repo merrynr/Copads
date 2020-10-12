@@ -8,7 +8,7 @@ mvn package
 ```
 
 ## **Executables**
-If not already in project1 directory, cd project1
+If not already in project1 directory, cd project2
 
 Start a peer
 
