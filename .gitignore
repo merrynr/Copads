@@ -23,3 +23,16 @@ gradle-app.setting
 
 ### Datasets
 /basic_word_count/amazon-fine-food-reviews/*.csv
+
+# Ignore other modules
+basic_word_count/*
+distributed_consensus/*
+distributed_hash_table/*
+gossip_protocol/*
+project1/*
+project2/*
+pubsub/*
+remote_method_invocation/*
+remote_procedure_call/*
+socket_programming/*
+

@@ -1,0 +1,78 @@
+# Test this without rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up
+# Test this with rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up --build
+
+version: '3.7'
+
+services:
+  peer1:
+    build:
+      context: .
+      dockerfile: Dockerfile-project3
+    image: project3:latest
+    container_name: peer1
+    working_dir: /csci251/project3
+    volumes:
+      - ./project2:/project3
+    environment:
+      - HOSTNAME=peer3
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer1"
+        tail -f /dev/null
+
+
+  peer2:
+    image: project3:latest
+    container_name: peer2
+    depends_on:
+      - peer1
+    working_dir: /csci251/project3
+    volumes:
+      - ./project3:/project3
+    environment:
+      - HOSTNAME=peer2
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer2"
+        tail -f /dev/null
+
+  peer3:
+    image: project3:latest
+    container_name: peer3
+    depends_on:
+      - peer2
+    working_dir: /csci251/project3
+    volumes:
+      - ./project2:/project3
+    environment:
+      - HOSTNAME=peer3
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer3"
+        tail -f /dev/null
+
+
+
+networks:
+  csci251network:

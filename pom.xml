@@ -23,6 +23,7 @@
         <module>gossip_protocol</module>
         <module>project1</module>
         <module>project2</module>
+        <module>project3</module>
 
     </modules>
 

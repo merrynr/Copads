@@ -1,0 +1,28 @@
+# Ubuntu 18.04 with JDK 11
+# Build image with:  docker build -t project2:latest -f Dockerfile-project2.
+
+FROM ubuntu:18.04
+MAINTAINER Hello!
+
+# install all dependencies
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y net-tools iputils-ping maven gradle nmap wget git vim build-essential && \
+    apt-get clean
+
+# create a new directory as the working directory
+RUN mkdir /csci251
+
+
+# copy files from the directory of the Dockerfile on your computer to this docker build environment.
+COPY project2 /csci251/project3/
+COPY pom.xml /csci251/
+COPY README.md /csci251/
+COPY LICENSE /csci251/
+
+# setup working directory in the container
+WORKDIR /csci251/project3
+
+# go into the working directory and build java package using maven
+RUN cd /csci251/project3/ && mvn package
