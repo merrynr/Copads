@@ -55,7 +55,8 @@ class Unicast extends Thread {
 }
 
 
-class UnicastConnection extends Thread {
+class
+UnicastConnection extends Thread {
 
     Node node;
 
