@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 
 /***
@@ -26,6 +27,8 @@ public class Node {
     private boolean voted;
     // The current state of the node
     private STATE state;
+    // List of Peers
+    private ArrayList peerList;
 
 
     private class Timer extends Thread {
