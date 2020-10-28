@@ -1,5 +1,5 @@
-# Test this without rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up
-# Test this with rebuilding the docker image $> docker-compose -f docker-compose-project2.yml up --build
+# Test this without rebuilding the docker image $> docker-compose -f docker-compose-project3.yml up
+# Test this with rebuilding the docker image $> docker-compose -f docker-compose-project3.yml up --build
 
 version: '3.7'
 
@@ -70,6 +70,29 @@ services:
       - -c
       - |
         echo "Initialized peer3"
+        tail -f /dev/null
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile-project3
+    image: project3:latest
+    container_name: client
+    working_dir: /csci251/project3
+    volumes:
+      - ./project2:/project3
+    environment:
+      - HOSTNAME=client
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized client"
         tail -f /dev/null
 
 

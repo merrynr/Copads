@@ -1,5 +1,5 @@
 # Ubuntu 18.04 with JDK 11
-# Build image with:  docker build -t project2:latest -f Dockerfile-project2.
+# Build image with:  docker build -t project3:latest -f Dockerfile-project3.
 
 FROM ubuntu:18.04
 MAINTAINER Hello!
@@ -16,7 +16,7 @@ RUN mkdir /csci251
 
 
 # copy files from the directory of the Dockerfile on your computer to this docker build environment.
-COPY project2 /csci251/project3/
+COPY project3 /csci251/project3/
 COPY pom.xml /csci251/
 COPY README.md /csci251/
 COPY LICENSE /csci251/

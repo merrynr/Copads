@@ -1,10 +1,12 @@
+package Server;
+
 import java.io.File;
 import java.util.*;
 
 /***
  * Class representing one of our nodes
  */
-public class Node {
+public class Node extends Thread {
 
     /**
      * Enum representing the possible states of a node
@@ -32,6 +34,8 @@ public class Node {
 
     // The list of all the peers in the cluster
     private ArrayList<String> peerList;
+    // The name of the current leader of the cluster, or null if during election
+    private String leader;
     // The total number of nodes in this cluster
     private final int total = 3; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
     // The name of this node
@@ -39,7 +43,7 @@ public class Node {
 
 
     public Node() {
-        //log = new File(); //TODO: need to deal with filepath
+        log = new File("src/main/resources/log.txt");
         hashMap = new HashMap<>();
         msgQueue = new LinkedList<>();
 
@@ -62,15 +66,15 @@ public class Node {
         System.out.println("I am " + name); //~Print~//
     }
 
-    //Methods (synchronization on msgQueue might require Node to be a Thread...hmm):
+    //Methods (synchronization on msgQueue might require Server.Node to be a Thread...hmm):
     //private void processMessage(String message) {}
 
 
     /**
-     * Timer thread subclass: gens random time from 3 to 5 s and countdown. Alerts Node to change status(es) at 0
+     * Timer thread subclass: gens random time from 3 to 5 s and countdown. Alerts Server.Node to change status(es) at 0
      * */
     private class Timer extends Thread {
-        //TODO: (might be able to reuse project 2's with some mods like the randomization?)
+
     }
 
     /**

@@ -1,3 +1,5 @@
+package Server;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -19,11 +21,11 @@ class Unicast extends Thread {
         port = 9092;
     }
 
-    /** Unicast server */
+    /** Server.Unicast server */
     public void run() {
         try {
             listenerSocket = new ServerSocket(port);
-            System.out.println("Unicast Server started ..."); //~*TestPrint*~//
+            System.out.println("Server.Unicast Server started ..."); //~Print~//
             while (true) {
                 Socket peerSocket = listenerSocket.accept();
                 UnicastConnection c = new UnicastConnection(node, peerSocket);
@@ -34,8 +36,8 @@ class Unicast extends Thread {
         }
     }
 
-    public static void unicast (String message, String name) throws IOException{
-        Socket senderSocket = new Socket(name, port);
+    public static void sendMsg(String message, String peerName) throws IOException{
+        Socket senderSocket = new Socket(peerName, port);
         DataOutputStream out = new DataOutputStream(senderSocket.getOutputStream());
 
         out.writeUTF(message);
@@ -73,11 +75,13 @@ UnicastConnection extends Thread {
         }
     }
 
-    /** Unicast listener */
+    /** Server.Unicast listener */
     public void run() {
         try {
             String message = in.readUTF();
-            //node.addMessage(message);
+
+            //node.addMessage(message); //TODO
+
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());
         } catch (IOException e) {
