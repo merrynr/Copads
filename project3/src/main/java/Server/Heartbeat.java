@@ -18,7 +18,7 @@ class Heartbeat extends Thread {
     public void run() {
 
         while (node.getNodeState() == Node.STATE.LEADER) {
-            node.addMessage(node.getName() + "/ALL/Heartbeat");
+            node.addMessage(node.getName() + "/ALL/HEARTBEAT");
         }
 
         try {

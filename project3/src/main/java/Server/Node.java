@@ -1,6 +1,7 @@
 package Server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /***
@@ -17,7 +18,7 @@ public class Node extends Thread {
     // The message log TODO: Type
     private File log;
     // The key-value pair map TODO: k/v types
-    private Map<Integer, String> hashMap;
+    private Map<String, String> hashMap;
     // The queue to keep track of & send outgoing messages
     private Queue<String> msgQueue;
 
@@ -99,7 +100,56 @@ public class Node extends Thread {
         }
     }
 
-    public void processMessage() {}
+    public void processMessage() {
+        String message;
+        while (true) {
+
+            //RETRIEVE MESSAGE FROM QUEUE
+            while (msgQueue.isEmpty()) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            synchronized (msgQueue) {
+                message = msgQueue.remove();
+            }
+
+
+            //PROCESS MESSAGE
+            String[] splitMessage = message.split("/");
+
+            //MESSAGE BEING SENT BY NODE
+            if (splitMessage[0].equals(this.name)) {
+
+                //SEND MESSAGE TO ALL OTHER NODES
+                if (splitMessage[1].equals("ALL")) {
+                    for (String peer : peerList) {
+                        try {
+                            Unicast.sendMsg(message, peer);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {    //SEND TO 1 NODE
+                    try {
+                        Unicast.sendMsg(message, splitMessage[1]);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } else {    //MESSAGE BEING RECEIVED BY NODE
+
+                if (splitMessage[2].equals("HEARTBEAT")) {
+                    resetTimer();
+                }
+
+            }
+        }
+    }
 
 
     public STATE getNodeState() {
