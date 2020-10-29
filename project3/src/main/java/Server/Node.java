@@ -36,28 +36,30 @@ public class Node extends Thread {
     private ArrayList<String> peerList;
     // The name of the current leader of the cluster, or null if during election
     private String leader;
-    // The total number of nodes in this cluster
-    private final int total = 3; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
+    // The totalNodes number of nodes in this cluster
+    private final int totalNodes = 3; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
     // The name of this node
     private String name;
 
 
+    /* Node constructor: initialize new node */ //OK
     public Node() {
         log = new File("src/main/resources/log.txt");
         hashMap = new HashMap<>();
         msgQueue = new LinkedList<>();
 
-        timer = new Timer();
+        timer = new Timer(this);
         voteCount = 0;
         term = 0;
         voted = false;
         state = STATE.FOLLOWER;
 
         peerList = new ArrayList();
+        leader = null;
         name = System.getenv("HOSTNAME");
 
         //hard-code peerlist portion (fix me at the end)
-        for (int i = 1; i <= total; i++) {
+        for (int i = 1; i <= totalNodes; i++) {
             String next = "peer" + i;
             if(!next.equals(name))
                 peerList.add(next);
@@ -66,22 +68,26 @@ public class Node extends Thread {
         System.out.println("I am " + name); //~Print~//
     }
 
-    //Methods (synchronization on msgQueue might require Server.Node to be a Thread...hmm):
-    //private void processMessage(String message) {}
+    public void resetTimer() {
+        timer.interrupt();
+        timer = new Timer(this);
+        timer.start();
+    }
 
-
-    /**
-     * Timer thread subclass: gens random time from 3 to 5 s and countdown. Alerts Server.Node to change status(es) at 0
-     * */
-    private class Timer extends Thread {
+    //ELECTION
+    /* Method to create new election thread and start election process */
+    public void startElection() {
 
     }
 
-    /**
-     * Heartbeat generator: a counter thread that generates heartbeat messages and adds them to the msgQueue
-     */
-    private class Heartbeat extends Thread {
-        //TODO: (could also choose to reuse project 2's heartbeat, but with 0.5 s...?)
+    //Methods (synchronization on msgQueue might require Server.Node to be a Thread...hmm):
+
+
+
+    //STATIC HELPER METHODS:
+    public static int genRandomNum(int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max - min + 1) + min;
     }
 
 }
