@@ -10,6 +10,23 @@ class Heartbeat extends Thread {
         node = current;
     }
 
+
+    /**
+     * Run method for hearthbeat thread
+     * Adds message to message queue to send heartbeat message to all nodes
+     */
     public void run() {
+
+        while (node.getNodeState() == Node.STATE.LEADER) {
+            node.addMessage(node.getName() + "/ALL/Heartbeat");
+        }
+
+        try {
+            sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
+
 }

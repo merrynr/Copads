@@ -90,4 +90,19 @@ public class Node extends Thread {
         return random.nextInt(max - min + 1) + min;
     }
 
+
+
+    //MESSAGES
+    public void addMessage(String message) {
+        synchronized (msgQueue) {
+            msgQueue.add(message);
+        }
+    }
+
+    public void processMessage() {}
+
+
+    public STATE getNodeState() {
+        return this.state;
+    }
 }
