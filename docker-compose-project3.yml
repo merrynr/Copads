@@ -12,9 +12,9 @@ services:
     container_name: peer1
     working_dir: /csci251/project3
     volumes:
-      - ./project2:/project3
+      - ./project3:/project3
     environment:
-      - HOSTNAME=peer3
+      - HOSTNAME=peer1
     networks:
       - csci251network
     ports:
@@ -57,7 +57,7 @@ services:
       - peer2
     working_dir: /csci251/project3
     volumes:
-      - ./project2:/project3
+      - ./project3:/project3
     environment:
       - HOSTNAME=peer3
     networks:
@@ -78,9 +78,11 @@ services:
       dockerfile: Dockerfile-project3
     image: project3:latest
     container_name: client
+    depends_on:
+      - peer1
     working_dir: /csci251/project3
     volumes:
-      - ./project2:/project3
+      - ./project3:/project3
     environment:
       - HOSTNAME=client
     networks:

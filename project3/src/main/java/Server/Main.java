@@ -1,12 +1,11 @@
 package Server;
 
-import Server.Node;
-
 public class Main {
     public static void main(String args[]) {
 
         Node node = new Node();
         node.start();
+
         Unicast unicast = new Unicast(node);
         unicast.start();
 

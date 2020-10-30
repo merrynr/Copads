@@ -22,7 +22,8 @@ public class Timer extends Thread {
         }
 
         if(!isInterrupted) {
-            node.startElection(); //something like this
+            System.out.println("starting election...");
+            node.startElection();
         }
     }
 }

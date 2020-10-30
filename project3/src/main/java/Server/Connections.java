@@ -25,7 +25,7 @@ class Unicast extends Thread {
     public void run() {
         try {
             listenerSocket = new ServerSocket(port);
-            System.out.println("Server.Unicast Server started ..."); //~Print~//
+            System.out.println("connection srver started ...\n"); //~Print~//
             while (true) {
                 Socket peerSocket = listenerSocket.accept();
                 UnicastConnection c = new UnicastConnection(node, peerSocket);
@@ -57,8 +57,7 @@ class Unicast extends Thread {
 }
 
 
-class
-UnicastConnection extends Thread {
+class UnicastConnection extends Thread {
 
     Node node;
 
@@ -80,7 +79,7 @@ UnicastConnection extends Thread {
         try {
             String message = in.readUTF();
 
-            //node.addMessage(message); //TODO
+            node.addMessage(message);
 
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());
