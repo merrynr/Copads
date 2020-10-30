@@ -15,17 +15,22 @@ public class Node extends Thread {
     public enum STATE {LEADER, FOLLOWER, CANDIDATE}
 
 
-    // The message log TODO: Type
+    // The message log
     private File log;
-    // The key-value pair map TODO: k/v types
+    // The key-value pair map
     private Map<String, String> hashMap;
+
+    private int sequence; //sequence # of the last committed log message
+    private boolean request;
+    private String key;
+    private String val;
+
     // The queue to keep track of & send outgoing messages
-    private Queue<String> msgQueue;
+    private final Queue<String> msgQueue;
+    // The queue to keep track of log requests
 
     // The timer for this node
     private Timer timer;
-    // The number of votes the node has received for the current term
-    private int voteCount; //(Keeping for appendlog votes for now)
     // The current term of voting
     private int term;
     // Whether the node has receiveList for the current term
@@ -38,32 +43,40 @@ public class Node extends Thread {
     // The name of the current leader of the cluster, or null if during election
     private String leader;
     // The totalNodes number of nodes in this cluster
-    private final int totalNodes = 5; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
+    private final int totalNodes = 5;
 
     // The name of this node
     private String name;
 
-    private Heartbeat heartbeat;
-    private Election election;
+    private Heartbeat heartbeat = null;
+    private Election election = null;
+    private LogReplication logReplication = null;
 
 
     /* Node constructor: initialize new node */ //OK
     public Node() {
         log = new File("src/main/resources/log.txt");
+
+        //while log
+
         hashMap = new HashMap<>();
+        sequence = 0;
+        request = false;
+        key = null;
+        val = null;
+
         msgQueue = new LinkedList<>();
 
-        voteCount = 0;
         term = 0;
         voted = false;
         state = STATE.FOLLOWER;
 
-        nodeList = new HashSet<String>();
+        nodeList = new HashSet<>();
         leader = null;
 
         name = System.getenv("HOSTNAME");
 
-        //hard-code peerlist portion (fix me at the end)
+        //FIXME: hard-code peerList portion (fix me at the end)
         for (int i = 1; i <= totalNodes; i++) {
             String next = "peer" + i;
             nodeList.add(next);
@@ -136,7 +149,7 @@ public class Node extends Thread {
     }
 
     //HEARTBEAT
-    /* Method to create new election thread and start election process */
+    /* Method to create new heartbeat thread and start heartbeats when current node is the leader */
     public void startHeartbeat() {
         state = STATE.LEADER;
         leader = name;
@@ -148,7 +161,36 @@ public class Node extends Thread {
         heartbeat = new Heartbeat(this);
         heartbeat.start();
 
-        System.out.println("BECAME LEADER.");
+        System.out.println("BECAME LEADER."); //~Print~//
+    }
+
+    //LOG_REPLICATION
+    /* Method to create new election thread and start election process */
+    public void startLogReplication() {
+        if (state.equals(STATE.LEADER)) {
+
+            if (logReplication != null && logReplication.isAlive()) { //This block should hopefully never run!
+                logReplication.interrupt();
+            }
+
+            logReplication = new LogReplication(this);
+            logReplication.start();
+
+            System.out.println("\tstarted log replication"); //~Print~//
+        }
+    }
+
+    /* Method to temporarily log current data on this node */
+    public void append(boolean r, String k, String v) {
+        request = r;
+        key = k;
+        val = v;
+    }
+    /* Method to commit current data on this node */
+    public void commit() {
+        hashMap.put(key, val);
+        request = false;
+        sequence++;
     }
 
 
@@ -168,7 +210,7 @@ public class Node extends Thread {
 
         //MESSAGE BEING SENT BY NODE
         if (splitMessage[0].equals(this.name)) {
-            System.out.println("Sending: " + message);
+            System.out.println("Sending: " + message); //~Print~//
 
             //SEND MESSAGE TO ALL OTHER NODES
             if (splitMessage[1].equals("ALL")) {
@@ -195,57 +237,102 @@ public class Node extends Thread {
             }
 
         } else {    //MESSAGE BEING RECEIVED BY NODE
-            System.out.println("Received: " + message);
+            System.out.println("Received: " + message); //~Print~//
+            int msgTerm;
 
-            if (splitMessage[2].equals("HEARTBEAT")) {
+            switch (splitMessage[2]) {
+                case "HEARTBEAT":
+                    //RESOLVE TERM INCONSISTENCIES
+                    msgTerm = Integer.parseInt(splitMessage[3]); //(writing them separately 4 now, since log may be different)
 
-                //RESOLVE TERM INCONSISTENCIES
-                int msgTerm = Integer.parseInt(splitMessage[3]); //(writing them separately 4 now, since log may be different)
-
-                if (msgTerm > term) {
-                    term = msgTerm;
-                    voted = true;
-                }
-
-                if (!state.equals(STATE.FOLLOWER)) {
-                    state = STATE.FOLLOWER;
-                }
-
-                if (leader != splitMessage[0]) {
-                    leader = splitMessage[0];
-                }
-
-                //HEARTBEAT
-                resetTimer();
-
-            } else if (splitMessage[2].equals("VOTE_REQUEST")) {
-
-                //RESOLVE TERM INCONSISTENCIES
-                int msgTerm = Integer.parseInt(splitMessage[3]);
-
-                if (msgTerm > term) {
-                    term = msgTerm;
-                    voted = false;
-
-                    if (state.equals(STATE.LEADER)) {
-                        state = STATE.FOLLOWER;
-                        heartbeat.interrupt();
-                        timer.start();
+                    if (msgTerm > term) {
+                        term = msgTerm;
+                        voted = true;
                     }
-                }
+                    if (!state.equals(STATE.FOLLOWER)) {
+                        state = STATE.FOLLOWER;
+                    }
+                    if (leader != splitMessage[0]) {
+                        leader = splitMessage[0];
+                    }
 
-                if (leader != null) {
-                    leader = null;
-                }
+                    //HEARTBEAT
+                    resetTimer();
+                    break;
 
-                //VOTE_RESPONSE
-                if (!voted) {
-                    addMessage( splitMessage[1] + "/" + splitMessage[0] + "/VOTE_RESPONSE/" + msgTerm);
-                    voted = true;
-                }
+                case "LOG_REQUEST": //(Message format: Sender/Receiver/LOG_REQUEST/Key/Value)
+                    if (state.equals(STATE.LEADER) && !request) { //BEGIN LOG_REPLICATION (Leader and not busy)
+                        append(true, splitMessage[3], splitMessage[4]);
+                        logReplication.addLogResponse(name);
 
-            } else if (splitMessage[2].equals("VOTE_RESPONSE")) {
-                election.addVote(splitMessage[0]);
+                    } else if (leader != null) { //FORWARD TO LEADER (Not Leader)
+                        splitMessage[0] = name;
+                        splitMessage[1] = leader;
+                        addMessage(String.join("/", splitMessage));
+
+                    } else { //REJECT CLIENT REQUEST (Leader busy, or election occurring)
+                        addMessage( splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/Unable to process your " +
+                                "request - Server busy. Please try again in a few moments.");
+                    }
+                    break;
+
+                case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY)
+                    addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT:/\n" + hashMap.toString());
+                    break;
+
+                case "LOG_APPEND": //FIXME
+                    // (Message format:  Sender/Receiver/LOG_APPEND/Sequence/Key/Value)
+                    if (state.equals(STATE.FOLLOWER)){
+                        append(true, splitMessage[4], splitMessage[5]); //TODO:4,5 -> 6,7
+                        addMessage( splitMessage[1] + "/" + splitMessage[0] + "/LOG_RESPONSE"); //TODO:Reformat msg args
+                    }
+
+                    break;
+
+                case "LOG_RESPONSE": //FIXME
+                    if (state.equals(STATE.LEADER)){
+                        logReplication.addLogResponse(splitMessage[0]);
+                    }
+                    break;
+
+                case "LOG_COMMIT": //FIXME
+                    if (state.equals(STATE.FOLLOWER)){
+                        if (Integer.parseInt(splitMessage[3]) == (sequence+1)) {
+                            commit();
+                        }
+                    }
+
+
+                    break;
+
+                case "VOTE_REQUEST":
+                    //RESOLVE TERM INCONSISTENCIES
+                    msgTerm = Integer.parseInt(splitMessage[3]);
+
+                    if (msgTerm > term) {
+                        term = msgTerm;
+                        voted = false;
+
+                        if (state.equals(STATE.LEADER)) {
+                            state = STATE.FOLLOWER;
+                            heartbeat.interrupt();
+                            timer.start();
+                        }
+                    }
+                    if (leader != null) {
+                        leader = null;
+                    }
+
+                    //RESPOND
+                    if (!voted) {
+                        addMessage( splitMessage[1] + "/" + splitMessage[0] + "/VOTE_RESPONSE/" + msgTerm);
+                        voted = true;
+                    }
+                    break;
+
+                case "VOTE_RESPONSE":
+                    election.addVote(splitMessage[0]);
+                    break;
             }
         }
     }
@@ -269,7 +356,23 @@ public class Node extends Thread {
         return this.term;
     }
 
-    /* create a copy of a set of the other peers to send messages to*/
+    public boolean getRequest() {
+        return this.request;
+    }
+
+    public String getKey() {
+        return this.key;
+    }
+
+    public String getVal() {
+        return this.val;
+    }
+
+    public int getSequence() {
+        return this.sequence;
+    }
+
+    /* create a copy of a set of the other peers to send messages to */
     public HashSet<String> getSendList() {
         HashSet<String> sendList = new HashSet<>(nodeList);
         sendList.remove(name);
