@@ -72,6 +72,50 @@ services:
         echo "Initialized peer3"
         tail -f /dev/null
 
+  peer4:
+    image: project3:latest
+    container_name: peer4
+    depends_on:
+      - peer1
+    working_dir: /csci251/project3
+    volumes:
+      - ./project3:/project3
+    environment:
+      - HOSTNAME=peer4
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer4"
+        tail -f /dev/null
+
+  peer5:
+    image: project3:latest
+    container_name: peer5
+    depends_on:
+      - peer1
+    working_dir: /csci251/project3
+    volumes:
+      - ./project3:/project3
+    environment:
+      - HOSTNAME=peer5
+    networks:
+      - csci251network
+    ports:
+      - 9091
+      - 9092
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Initialized peer5"
+        tail -f /dev/null
+
   client:
     build:
       context: .

@@ -25,7 +25,7 @@ class Unicast extends Thread {
     public void run() {
         try {
             listenerSocket = new ServerSocket(port);
-            System.out.println("connection srver started ...\n"); //~Print~//
+            System.out.println("connection server started ...\n"); //~Print~//
             while (true) {
                 Socket peerSocket = listenerSocket.accept();
                 UnicastConnection c = new UnicastConnection(node, peerSocket);

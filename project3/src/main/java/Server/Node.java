@@ -38,7 +38,7 @@ public class Node extends Thread {
     // The name of the current leader of the cluster, or null if during election
     private String leader;
     // The totalNodes number of nodes in this cluster
-    private final int totalNodes = 3; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
+    private final int totalNodes = 5; //FIXME: still need to change to 5 & add 2 more peers in docker-compose
 
     // The name of this node
     private String name;
@@ -168,6 +168,7 @@ public class Node extends Thread {
 
         //MESSAGE BEING SENT BY NODE
         if (splitMessage[0].equals(this.name)) {
+            System.out.println("Sending: " + message);
 
             //SEND MESSAGE TO ALL OTHER NODES
             if (splitMessage[1].equals("ALL")) {
@@ -177,12 +178,11 @@ public class Node extends Thread {
 
                         splitMessage[1] = peer;
                         String outmsg = String.join("/", splitMessage);
-                        System.out.println("Sending: " + outmsg);
 
                         try {
                             Unicast.sendMsg(outmsg, peer);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            //This means the peer we are sending to is down. This is ok, just continue to the next one
                         }
                     }
                 }
@@ -190,7 +190,7 @@ public class Node extends Thread {
                 try {
                     Unicast.sendMsg(message, splitMessage[1]);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    //This means the peer we are sending to is down. This is ok, just continue to the next one
                 }
             }
 
