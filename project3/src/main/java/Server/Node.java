@@ -1,7 +1,10 @@
 package Server;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.*;
 
 /***
@@ -16,11 +19,11 @@ public class Node extends Thread {
 
 
     // The message log
-    private File log;
+    private ArrayList<String> log;
     // The key-value pair map
     private Map<String, String> hashMap;
 
-    private int sequence; //sequence # of the last committed log message
+    private int sequence; //sequence # of the last log append/commit message
     private boolean request;
     private String key;
     private String val;
@@ -55,12 +58,12 @@ public class Node extends Thread {
 
     /* Node constructor: initialize new node */ //OK
     public Node() {
-        log = new File("src/main/resources/log.txt");
+        log = new ArrayList<>();
 
         //while log
 
         hashMap = new HashMap<>();
-        sequence = 0;
+        sequence = -1;
         request = false;
         key = null;
         val = null;
@@ -180,7 +183,7 @@ public class Node extends Thread {
         }
     }
 
-    /* Method to temporarily log current data on this node */
+    /* Method to temporarily store current data on this node */
     public void append(boolean r, String k, String v) {
         request = r;
         key = k;
@@ -190,7 +193,11 @@ public class Node extends Thread {
     public void commit() {
         hashMap.put(key, val);
         request = false;
-        sequence++;
+    }
+
+    /* Method to write log append/commit messages to log*/
+    public void write(int seq, String msg) {
+        log.add(seq, msg);
     }
 
 
@@ -239,6 +246,7 @@ public class Node extends Thread {
         } else {    //MESSAGE BEING RECEIVED BY NODE
             System.out.println("Received: " + message); //~Print~//
             int msgTerm;
+            int seq;
 
             switch (splitMessage[2]) {
                 case "HEARTBEAT":
@@ -261,16 +269,19 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_REQUEST": //(Message format: Sender/Receiver/LOG_REQUEST/Key/Value)
-                    if (state.equals(STATE.LEADER) && !request) { //BEGIN LOG_REPLICATION (Leader and not busy)
+                    if (state.equals(STATE.LEADER) && !request) {
+                        //BEGIN LOG_REPLICATION (Leader and not busy)
                         append(true, splitMessage[3], splitMessage[4]);
                         logReplication.addLogResponse(name);
 
-                    } else if (leader != null) { //FORWARD TO LEADER (Not Leader)
+                    } else if (leader != null) {
+                        //FORWARD TO LEADER (Not Leader)
                         splitMessage[0] = name;
                         splitMessage[1] = leader;
                         addMessage(String.join("/", splitMessage));
 
-                    } else { //REJECT CLIENT REQUEST (Leader busy, or election occurring)
+                    } else {
+                        //REJECT CLIENT REQUEST (Leader busy, or election occurring)
                         addMessage( splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/Unable to process your " +
                                 "request - Server busy. Please try again in a few moments.");
                     }
@@ -281,12 +292,22 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_APPEND": //FIXME
+                    seq = Integer.parseInt(splitMessage[3]);
                     // (Message format:  Sender/Receiver/LOG_APPEND/Sequence/Key/Value)
                     if (state.equals(STATE.FOLLOWER)){
-                        append(true, splitMessage[4], splitMessage[5]); //TODO:4,5 -> 6,7
-                        addMessage( splitMessage[1] + "/" + splitMessage[0] + "/LOG_RESPONSE"); //TODO:Reformat msg args
-                    }
+                        //PROCEED WITH CURRENT REPLICATION (node caught up)
+                        if (sequence == seq-1) {
+                            append(true, splitMessage[4], splitMessage[5]);
 
+                            write(seq, splitMessage[2] + "/" + String.join("/", Arrays.copyOfRange(splitMessage, 4, 6)));
+                            incrSeq();
+
+                            addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_RESPONSE");
+                        } else {
+                            //ASK LEADER for LOG_SYNC (node is behind)
+                            addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_REQUEST/" + sequence);
+                        }
+                    }
                     break;
 
                 case "LOG_RESPONSE": //FIXME
@@ -296,13 +317,48 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_COMMIT": //FIXME
+                    seq = Integer.parseInt(splitMessage[3]);
+
                     if (state.equals(STATE.FOLLOWER)){
-                        if (Integer.parseInt(splitMessage[3]) == (sequence+1)) {
+                        if (sequence == seq-1) {
+                            //PROCEED WITH CURRENT COMMIT (node caught up)
                             commit();
+
+                            write(seq, splitMessage[2]);
+                            incrSeq();
+                        } else {
+                            //ASK LEADER for LOG_SYNC (node is behind)
+                            addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_REQUEST/" + sequence);
                         }
                     }
+                    break;
 
+                case "LOG_SYNC_REQUEST":
+                    if (state.equals(STATE.LEADER)){
+                        String[] parselm;
+                        for(int i = Integer.parseInt(splitMessage[3])+1; i < log.size(); i++) {
+                            parselm = log.get(i).split("/");
+                            String retMsg = splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_EXECUTE" + "/" + parselm[0] + "/" + i;
 
+                            if(parselm[0].equals("LOG_APPEND")) {
+                                retMsg = retMsg + "/" + parselm[1] + "/" + parselm[2];
+                            }
+                            addMessage(retMsg);
+                        }
+                    }
+                    break;
+
+                case "LOG_SYNC_EXECUTE":
+                    seq = Integer.parseInt(splitMessage[4]);
+                    if  (splitMessage[3].equals("LOG_APPEND")) {
+                        append(true, splitMessage[5], splitMessage[6]);
+                        write(seq, splitMessage[3] + "/" + String.join("/", Arrays.copyOfRange(splitMessage, 5, 7)));
+                        incrSeq();
+                    } else {
+                        commit();
+                        write(seq, splitMessage[3]);
+                        incrSeq();
+                    }
                     break;
 
                 case "VOTE_REQUEST":
@@ -370,6 +426,10 @@ public class Node extends Thread {
 
     public int getSequence() {
         return this.sequence;
+    }
+
+    public void incrSeq() {
+        sequence++;
     }
 
     /* create a copy of a set of the other peers to send messages to */

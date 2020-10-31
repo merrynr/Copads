@@ -25,11 +25,5 @@ java -cp target/project3-1.0-SNAPSHOT.jar Client/Client
 
 ## **Notes**
 
-A copy of each cluster node's log can be found at:
-
-```
-src/main/resources/results
-```
-
 (Project3's design architecture will be located next to this readme upon project completion.
 Architecture.png)
