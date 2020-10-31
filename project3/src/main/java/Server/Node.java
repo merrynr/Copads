@@ -288,7 +288,7 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY)
-                    addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT:/\n" + hashMap.toString());
+                    addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/\n" + hashMap.toString());
                     break;
 
                 case "LOG_APPEND": //FIXME
