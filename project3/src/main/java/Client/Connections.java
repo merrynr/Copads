@@ -76,7 +76,7 @@ class UnicastConnection extends Thread {
         try {
             String message = in.readUTF();
 
-            Client.addMessage(message);
+            System.out.println(message);
 
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());

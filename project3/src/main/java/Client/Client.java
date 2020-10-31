@@ -10,8 +10,7 @@ public class Client {
 
     public static Queue<String> msgQueue;
     public static Unicast unicast;
-    public static MessagePrinter messagePrinter;
-    public static String name = System.getenv("HOSTNAME");
+    public static String name;
     public static Set<String> nodeList;
     public static final int totalNodes = 5;
 
@@ -25,13 +24,11 @@ public class Client {
 
         for (int i = 1; i <= 5; i++) {
             String next = "peer" + i;
-             nodeList.add(next);
+            nodeList.add(next);
         }
         System.out.println("Client program started...");
         unicast = new Unicast();
         unicast.start();
-        messagePrinter = new MessagePrinter();
-        messagePrinter.start();
 
         for (int i = 1; i <= totalNodes; i++) {
             String next = "peer" + i;
@@ -41,78 +38,52 @@ public class Client {
         Scanner reader = new Scanner(System.in);
         String cmd;
         String msg;
+        int num;
 
         while (true) {
-            System.out.println("Enter QUERY or a KEY/VALUE pair to add");
+            System.out.println("Enter R for Request or Q for QUERY");
             cmd = reader.nextLine();
-            boolean sent = false;
+            switch (cmd) {
+                case "R":
+                    System.out.println("Enter <key> <value> <1 through 5>");
+                    String[] arr = reader.nextLine().split(" ");
 
-            if (cmd.equals("QUERY")) {
+                    num = Integer.parseInt(arr[1]);
 
-                for (String node : nodeList) {
-                    try {
-                        Unicast.sendMsg(Client.name + "/" + node + "/QUERY", node);
-                        sent = true;
-                    } catch (IOException e) {
-                        continue;
+                    if (num > 0 && num < 6) {
+                        msg = name + "/" + arr[2] + "/LOG_REQUEST/" + arr[0] + "/peer" + num;
+                        System.out.println(msg);
+
+                        try {
+                            Unicast.sendMsg(msg, arr[2]);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        System.out.println("Peer # out of range. Please try again");
                     }
 
-                    if (sent) {
-                        break;
+                    break;
+                case "Q":
+                    System.out.println("Enter which peer: <1 through 5>");
+                    cmd = reader.nextLine();
+                    num = Integer.parseInt(cmd);
+                    if (num > 0 && num < 6) {
+                        cmd = "peer" + num;
+
+                        msg = name + "/" + cmd + "/LOG_QUERY";
+                        System.out.println(msg);
+
+                        try {
+                            Unicast.sendMsg(msg, cmd);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-
-                if (!sent) {
-                    System.out.println("No valid nodes found");
-                }
-
-            } else {
-//
-                String[] splitInput = cmd.split("/");
-                for (String node : nodeList) {
-                    try {
-                        Unicast.sendMsg(Client.name + "/" + node + "/LOG_REQUEST" + splitInput[0] + "/" + splitInput[1], node);
-                        sent = true;
-                    } catch (IOException e) {
-                        continue;
-                    }
-                }
-
-                if (!sent) {
-                    System.out.println("No valid nodes found");
-                }
+                    break;
+                default:
+                    System.out.println("Cannot understand command. Please try again.");
             }
         }
     }
-
-    public static void addMessage(String message) {
-        synchronized (msgQueue) {
-            msgQueue.add(message);
-        }
-    }
-
-
-    public static class MessagePrinter extends Thread {
-
-        public void run() {
-            String message;
-
-            if (msgQueue.isEmpty()) {
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                synchronized (msgQueue) {
-                    message = msgQueue.remove();
-                }
-
-                String[] splitMessage = message.split("/");
-                System.out.println(splitMessage[3]);
-            }
-        }
-    }
-
-
 }
