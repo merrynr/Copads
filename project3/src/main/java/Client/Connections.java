@@ -13,13 +13,8 @@ import java.net.*;
 
 class Unicast extends Thread {
 
-    private static int port;
-
+    private static int port = 9092;
     ServerSocket listenerSocket;
-
-    public Unicast() {
-        port = 9092;
-    }
 
     /** Server.Unicast server */
     public void run() {
@@ -71,7 +66,7 @@ class UnicastConnection extends Thread {
         }
     }
 
-    /** Server.Unicast listener */
+    /** Client's Unicast listener */
     public void run() {
         try {
             String message = in.readUTF();
