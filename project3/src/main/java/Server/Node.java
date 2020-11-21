@@ -1,10 +1,6 @@
 package Server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.*;
 
 /***
@@ -79,7 +75,6 @@ public class Node extends Thread {
 
         name = System.getenv("HOSTNAME");
 
-        //FIXME: hard-code peerList portion (fix me at the end)
         for (int i = 1; i <= totalNodes; i++) {
             String next = "peer" + i;
             nodeList.add(next);
@@ -191,13 +186,27 @@ public class Node extends Thread {
     }
     /* Method to commit current data on this node */
     public void commit() {
-        hashMap.put(key, val);
+        if (val.equals("DELETE")) {
+            if (hashMap.containsKey(key)) {
+                hashMap.remove(key);
+            }
+        } else {
+            hashMap.put(key, val);
+        }
         request = false;
     }
 
     /* Method to write log append/commit messages to log*/
     public void write(int seq, String msg) {
         log.add(seq, msg);
+    }
+
+    /* Method to query & return a requested entry */
+    private String query(String key) {
+        if (hashMap.containsKey(key))
+            return hashMap.get(key);
+        else
+            return "nonexistent entry: \'" + key + "\'";
     }
 
 
@@ -287,11 +296,16 @@ public class Node extends Thread {
                     }
                     break;
 
-                case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY)
-                    addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/\n" + hashMap.toString());
+                case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY /(optional-key)
+                    if (splitMessage.length == 4) {
+                        addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/" + query(splitMessage[3]));
+                    }
+                    else {
+                        addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/" + hashMap.toString());
+                    }
                     break;
 
-                case "LOG_APPEND": //FIXME
+                case "LOG_APPEND":
                     seq = Integer.parseInt(splitMessage[3]);
                     // (Message format:  Sender/Receiver/LOG_APPEND/Sequence/Key/Value)
                     if (state.equals(STATE.FOLLOWER)){
@@ -310,13 +324,13 @@ public class Node extends Thread {
                     }
                     break;
 
-                case "LOG_RESPONSE": //FIXME
+                case "LOG_RESPONSE":
                     if (state.equals(STATE.LEADER)){
                         logReplication.addLogResponse(splitMessage[0]);
                     }
                     break;
 
-                case "LOG_COMMIT": //FIXME
+                case "LOG_COMMIT":
                     seq = Integer.parseInt(splitMessage[3]);
 
                     if (state.equals(STATE.FOLLOWER)){

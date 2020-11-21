@@ -29,6 +29,7 @@ public class Client {
 
         Scanner reader = new Scanner(System.in);
         String cmd;
+        String[] arr;
         String msg;
         int num;
 
@@ -37,8 +38,9 @@ public class Client {
             cmd = reader.nextLine();
             switch (cmd) {
                 case "R":
-                    System.out.println("Enter <key> <value> <1 through 5>");
-                    String[] arr = reader.nextLine().split(" ");
+                    System.out.println("Enter <key> <value> <1 through 5>\n" +
+                            "To delete an entry, type DELETE as the value.");
+                    arr = reader.nextLine().split(" ");
                     num = Integer.parseInt(arr[2]);
 
                     if (num > 0 && num < 6) {
@@ -56,16 +58,18 @@ public class Client {
 
                     break;
                 case "Q":
-                    System.out.println("Enter which peer: <1 through 5>");
-                    cmd = reader.nextLine();
-                    num = Integer.parseInt(cmd);
+                    System.out.println("Enter which peer: <1 through 5> <optional: key>");
+                    arr = reader.nextLine().split(" ");
+                    num = Integer.parseInt(arr[0]);
 
                     if (num > 0 && num < 6) {
-                        msg = name + "/" + "peer" + cmd + "/LOG_QUERY";
+                        msg = name + "/" + "peer" + arr[0] + "/LOG_QUERY";
+                        if(arr.length == 2)
+                            msg = msg + "/" + arr[1];
                         System.out.println(msg);
 
                         try {
-                            Unicast.sendMsg(msg, "peer" + cmd);
+                            Unicast.sendMsg(msg, "peer" + arr[0]);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
