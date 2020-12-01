@@ -42,7 +42,6 @@ public class Election extends Thread {
             } else {
                 node.stopTimer();
                 node.startHeartbeat();
-                node.startLogReplication();
             }
         }
     }

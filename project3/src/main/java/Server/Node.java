@@ -49,7 +49,6 @@ public class Node extends Thread {
 
     private Heartbeat heartbeat = null;
     private Election election = null;
-    private LogReplication logReplication = null;
 
 
     /* Node constructor: initialize new node */ //OK
@@ -162,22 +161,6 @@ public class Node extends Thread {
         System.out.println("BECAME LEADER."); //~Print~//
     }
 
-    //LOG_REPLICATION
-    /* Method to create new election thread and start election process */
-    public void startLogReplication() {
-        if (state.equals(STATE.LEADER)) {
-
-            if (logReplication != null && logReplication.isAlive()) { //This block should hopefully never run!
-                logReplication.interrupt();
-            }
-
-            logReplication = new LogReplication(this);
-            logReplication.start();
-
-            System.out.println("\tstarted log replication"); //~Print~//
-        }
-    }
-
     /* Method to temporarily store current data on this node */
     public void append(boolean r, String k, String v) {
         request = r;
@@ -258,7 +241,7 @@ public class Node extends Thread {
             int seq;
 
             switch (splitMessage[2]) {
-                case "HEARTBEAT":
+                case "HEARTBEAT": //(Message format: Sender/ALL/HEARTBEAT/term/sequence)
                     //RESOLVE TERM INCONSISTENCIES
                     msgTerm = Integer.parseInt(splitMessage[3]); //(writing them separately 4 now, since log may be different)
 
@@ -281,7 +264,7 @@ public class Node extends Thread {
                     if (state.equals(STATE.LEADER) && !request) {
                         //BEGIN LOG_REPLICATION (Leader and not busy)
                         append(true, splitMessage[3], splitMessage[4]);
-                        logReplication.addLogResponse(name);
+                        heartbeat.addLogResponse(name);
 
                     } else if (leader != null) {
                         //FORWARD TO LEADER (Not Leader)
@@ -296,7 +279,7 @@ public class Node extends Thread {
                     }
                     break;
 
-                case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY /(optional-key)
+                case "LOG_QUERY": //(Message format: Sender/Receiver/LOG_QUERY /(optional-key))
                     if (splitMessage.length == 4) {
                         addMessage(splitMessage[1] + "/" + splitMessage[0] + "/TO_CLIENT/" + query(splitMessage[3]));
                     }
@@ -317,7 +300,8 @@ public class Node extends Thread {
                             incrSeq();
 
                             addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_RESPONSE");
-                        } else {
+                        }
+                        else {
                             //ASK LEADER for LOG_SYNC (node is behind)
                             addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_REQUEST/" + sequence);
                         }
@@ -326,7 +310,7 @@ public class Node extends Thread {
 
                 case "LOG_RESPONSE":
                     if (state.equals(STATE.LEADER)){
-                        logReplication.addLogResponse(splitMessage[0]);
+                        heartbeat.addLogResponse(splitMessage[0]);
                     }
                     break;
 
