@@ -252,12 +252,15 @@ public class Node extends Thread {
                     if (!state.equals(STATE.FOLLOWER)) {
                         state = STATE.FOLLOWER;
                     }
-                    if (leader != splitMessage[0]) {
-                        leader = splitMessage[0];
-                    }
+                    leader = splitMessage[0];
 
                     //HEARTBEAT
                     resetTimer();
+                    seq = Integer.parseInt(splitMessage[4]);
+                    if (sequence < seq) {
+                        //ASK LEADER for LOG_SYNC (node is behind)
+                        addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_REQUEST/" + sequence);
+                    }
                     break;
 
                 case "LOG_REQUEST": //(Message format: Sender/Receiver/LOG_REQUEST/Key/Value)
@@ -301,10 +304,6 @@ public class Node extends Thread {
 
                             addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_RESPONSE");
                         }
-                        else {
-                            //ASK LEADER for LOG_SYNC (node is behind)
-                            addMessage(splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_REQUEST/" + sequence);
-                        }
                     }
                     break;
 
@@ -332,11 +331,12 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_SYNC_REQUEST":
+                    //(Message format: Sender/Receiver/LOG_SYNC_REQUEST/sequence)
                     if (state.equals(STATE.LEADER)){
                         String[] parselm;
                         for(int i = Integer.parseInt(splitMessage[3])+1; i < log.size(); i++) {
                             parselm = log.get(i).split("/");
-                            String retMsg = splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_EXECUTE" + "/" + parselm[0] + "/" + i;
+                            String retMsg = splitMessage[1] + "/" + splitMessage[0] + "/LOG_SYNC_EXECUTE/" + parselm[0] + "/" + i;
 
                             if(parselm[0].equals("LOG_APPEND")) {
                                 retMsg = retMsg + "/" + parselm[1] + "/" + parselm[2];
@@ -347,15 +347,18 @@ public class Node extends Thread {
                     break;
 
                 case "LOG_SYNC_EXECUTE":
+                    //(Message format: Sender/Receiver/LOG_SYNC_EXECUTE/<LOG_APPEND...LOG_COMMIT>/sequence(opt: /key/value))
                     seq = Integer.parseInt(splitMessage[4]);
-                    if  (splitMessage[3].equals("LOG_APPEND")) {
-                        append(true, splitMessage[5], splitMessage[6]);
-                        write(seq, splitMessage[3] + "/" + String.join("/", Arrays.copyOfRange(splitMessage, 5, 7)));
-                        incrSeq();
-                    } else {
-                        commit();
-                        write(seq, splitMessage[3]);
-                        incrSeq();
+                    if (sequence == seq-1) {
+                        if  (splitMessage[3].equals("LOG_APPEND")) {
+                            append(true, splitMessage[5], splitMessage[6]);
+                            write(seq, splitMessage[3] + "/" + String.join("/", Arrays.copyOfRange(splitMessage, 5, 7)));
+                            incrSeq();
+                        } else {
+                            commit();
+                            write(seq, splitMessage[3]);
+                            incrSeq();
+                        }
                     }
                     break;
 
